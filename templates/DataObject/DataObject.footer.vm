@@ -1,0 +1,19 @@
+
+## getters and setters
+#if($pk)
+    public $pk.getJavaType() get${pk.getCamelCaseName(true)}() {
+        return $pk.getCamelCaseName(false);
+    }
+#end
+    #foreach($column in $do.getColumns(false))
+        public $column.getJavaType() get${column.getCamelCaseName(true)}() {
+        return $column.getCamelCaseName(false);
+    }
+
+    public void set${column.getCamelCaseName(true)}(${column.getJavaType()} ${column.getCamelCaseName(false)}) {
+        this.${column.getCamelCaseName(false)} = $column.getCamelCaseName(false);
+        isModified = true;
+    }
+
+    #end
+}

@@ -1,0 +1,26 @@
+
+
+
+
+#*## unique key constructors
+    // unique key constructors
+    public $do.getCamelCaseName(true)($pk.getJavaType() $pk.getCamelCaseName(false)) {
+        load("SELECT " +
+#foreach($innerColumn in $do.getColumns())
+    #if($velocityHasNext)
+            "$innerColumn.columnName, " +
+    #else
+            "$innerColumn.columnName " +
+    #end
+#end
+        "FROM $do.getTableName() WHERE $pk.getColumnName()=?", Arrays.asList($pk.getCamelCaseName(false))
+        );
+    }*#
+
+
+
+## static method constructors for references
+
+
+
+

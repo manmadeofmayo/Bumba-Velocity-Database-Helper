@@ -1,0 +1,6 @@
+#* @implicitly included *#
+#* @vtlvariable name="reference" type="bumba.Column" *#
+#* @vtlvariable name="referenceColumns" type="java.util.List" *#
+#* @vtlvariable name="do" type="bumba.Table" *#
+#* @vtlvariable name="database" type="bumba.Database" *#
+#* @vtlvariable name="pk" type="bumba.Column" *#
