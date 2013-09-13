@@ -1,5 +1,7 @@
 package bumba;
 
+import bumba.database.core.Column;
+
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.util.List;

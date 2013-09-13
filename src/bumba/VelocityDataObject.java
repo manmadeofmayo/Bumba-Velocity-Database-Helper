@@ -1,5 +1,7 @@
 package bumba;
 
+import bumba.database.core.Table;
+
 /**
  * Created by emcee on 8/19/13.
  */

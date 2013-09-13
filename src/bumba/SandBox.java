@@ -1,5 +1,6 @@
 package bumba;
 
+import bumba.database.core.*;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -138,7 +139,7 @@ public class SandBox {
         //System.out.println("table start: " + table.getTableName());
         //System.out.println("primary: " + table.getPrimaryKey());
         //System.out.println(table.getTableType());
-        for (Column column : table.columnList) {
+        for (Column column : table.getColumns()) {
             //System.out.println(column.getColumnName());
             //System.out.println(column.getJavaType());
 
@@ -162,10 +163,8 @@ public class SandBox {
         EasyConnector ec = new EasyConnector(EasyConnector.ConnectionType.ORDERS);
         Database db = null;
         try {
-            db = new Database(ec.connection);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+            db = new Database(ec.getConnection());
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         Schema orders = null;
