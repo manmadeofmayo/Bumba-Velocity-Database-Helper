@@ -1,4 +1,4 @@
-package bumba;
+package bumba.database.core;
 
 import javax.naming.NamingException;
 import java.sql.Connection;

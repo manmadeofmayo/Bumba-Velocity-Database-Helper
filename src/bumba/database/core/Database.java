@@ -1,4 +1,4 @@
-package bumba;
+package bumba.database.core;
 
 import java.sql.*;
 import java.util.ArrayList;

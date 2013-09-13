@@ -1,10 +1,8 @@
-package bumba;
+package bumba.database.core;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -24,7 +22,7 @@ public class Column {
     protected Column referencedColumn = null;
     // true, false, and null for unknown
     Boolean nullable = null;
-    String defaultValue = null;
+    String defaultValue = "null";
     Boolean autoIncrementing = null;
     Boolean generated = null;
 
@@ -164,6 +162,13 @@ public class Column {
     }
 
     public String getDefaultValue() {
+        if (defaultValue == null) {
+            return "null";
+        } else if(defaultValue.contains("::")) {
+            return defaultValue.substring(0,defaultValue.indexOf("::"));
+        } else if (defaultValue.contains("(")) {
+            return "null";
+        }
         return defaultValue;
     }
 
@@ -230,6 +235,9 @@ public class Column {
 
     public void setIsPrimaryKey(boolean primaryKey) {
         isPrimaryKey = primaryKey;
+        if (javaClass.equals(Integer.class)) {
+            defaultValue = "-1";
+        }
     }
 
     public boolean isPrimaryKey() {
@@ -247,4 +255,18 @@ public class Column {
         }
         return getTableName();
     }
+
+    public String getName() {
+        return getCamelCaseName(false);
+    }
+
+    public String getTableType() {
+        return getOwningTable().getCamelCaseName(true);
+    }
+
+    public String getRefName() {
+        return getOwningTable().getCamelCaseName(false);
+    }
+
+
 }
