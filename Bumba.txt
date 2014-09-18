@@ -1,29 +1,22 @@
-From Wikipedia:
-
-Mbombo, also called Bumba, is the creator god in the religion and mythology of the Kuba of
-Central Africa. In the Mbombo creation myth, Mbombo was a giant in form and white in color.
-
 The story of Mbombo's creation tells that in the beginning, Mbombo was alone, and darkness
 and water covered the all earth. It would happen that Mbombo came to feel an intense pain
-in his stomach, and then Mbombo vomited the sun, the moon, and stars. The heat and light from the
-sun evaporated the water covering the earth, creating clouds, and after time, the dry hills
-emerged from the water. Then Mbombo vomited once more, bringing forth nine animals: the leopard,
-called Koy Bumba; the eagle, Ponga Bumba; the crocodile, Ganda Bumba; the fish, Yo Bumba;
-the tortoise, Kono Bumba; a black leopard-like animal, Tsetse Bumba; a white heron, Nyanyi Bumba;
-a scarab; and a goat named Budi. Mbombo also vomited many men, one of them was called Loko Yima.
+in his stomach, and then Mbombo vomited the sun, the moon, and stars.
 
-These nine animals went on to create all the world's creatures. The heron created all flying birds
-but one, the kite, and the crocodile created snakes and the iguana. The goat, Budi, brought forth
-all the horned animals, the scarab all insects, and Yo Bumba, all fish.
+Like Mbombo, Bumba was an initial effort to vomit forth the incredible amount of structure needed for creating a persistence layer.  Bumba provides the tools to create typed database objects and foreign-key-aware accessors straight from an existing schema using JDBC.
 
-Three of Mbombo's sons then said they would finish creating the world. The first to try,
-Nyonye Ngana, vomited white ants, but died after. To honor him, the ants went deep in the earth
-for dark soil to bury him and transformed the barren sands at the earth's surface. The second,
-Chonganda, created the first plant, which in turn gave rise to all trees, grasses and flowers.
-And Chedi Bumba, the third son, made the last bird, the kite.[2]
+Features:
+-Code generation based on objects from existing database schema for strongly-typed accessors
+-A simple API built over the ubiquity of JDBC to provide semantically lighter access to database metadata
+-Example Velocity templates included that produce messy but effective classes complete that are aware of column references, primary keys, CRUD ops, constructors, and basic but common data types.
 
-Tsetse Bumba caused trouble on the earth so Mbombo chased him into the sky where he became the
-thunderbolt. This left people without fire, so Mbombo showed them how to make it from trees.
-Once the creation was complete and peaceful, Mbombo delivered it to mankind and retreated into the
-heavens, leaving Loko Yima to serve as "god upon the earth".[1][2] The woman of the waters,
-Nchienge, lived in the East, and her son, Woto, became the first king of the Kuba.
+Project is in IntelliJ and uses Apache Velocity for code generation.  Used only for PostgreSQL 9.1 w/ 9.1 connector, but any database with a JDBC driver that provides reasonably compliant metadata should do.
+
+Future features that'd be nice to have:
+-Unit tests!
+-Templates to output classes compatible with popular persistence frameworks (eg. JPA)
+-Better logging!
+-Configuration passed in by Properties file or some such
+-An output configuration layer to separate database-level structure from class creation structure for cherry-picking data or relationships, and building classes without descending to templates.
+-Output conformance to a less clunky design pattern, perhaps utilizing/implementing interfaces
+-Style formatting automation to cleanup output files after generation (for now you have to use IDE formatting tools)
+-Pruning of smelly functions in Sandbox and conversion to a legitimate usage console
