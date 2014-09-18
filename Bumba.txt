@@ -20,3 +20,4 @@ Future features that'd be nice to have:
 -Output conformance to a less clunky design pattern, perhaps utilizing/implementing interfaces
 -Style formatting automation to cleanup output files after generation (for now you have to use IDE formatting tools)
 -Pruning of smelly functions in Sandbox and conversion to a legitimate usage console
+-Decouple SQL strings from implementations
