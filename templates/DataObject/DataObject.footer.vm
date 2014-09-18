@@ -11,9 +11,13 @@
     }
 
     public void set${column.getCamelCaseName(true)}(${column.getJavaType()} ${column.getCamelCaseName(false)}) {
-        this.${column.getCamelCaseName(false)} = $column.getCamelCaseName(false);
-        isModified = true;
+        if (!this.${column.getCamelCaseName(false)}.equals($column.getCamelCaseName(false))) {
+            this.${column.getCamelCaseName(false)} = $column.getCamelCaseName(false);
+            isModified = true;
+        }
     }
 
+        ##TODO: add special handling for references
+        ##TODO: add getters for foreign key references that lazy-load
     #end
 }
