@@ -1,6 +1,9 @@
 #* @implicitly included *#
-#* @vtlvariable name="reference" type="bumba.Column" *#
+#* @vtlmacrolibrary path="../templates/DataObject/functions.vm" *#
+#* @vtlvariable name="column" type="bumba.database.core.Column" *#
+#* @vtlvariable name="pk_default" type="java.lang.Object" *#
+#* @vtlvariable name="reference" type="bumba.database.core.Column" *#
 #* @vtlvariable name="referenceColumns" type="java.util.List" *#
-#* @vtlvariable name="do" type="bumba.Table" *#
-#* @vtlvariable name="database" type="bumba.Database" *#
-#* @vtlvariable name="pk" type="bumba.Column" *#
+#* @vtlvariable name="do" type="bumba.database.core.Table" *#
+#* @vtlvariable name="database" type="bumba.database.core.Database" *#
+#* @vtlvariable name="pk" type="bumba.database.core.Column" *#

@@ -1,6 +1,10 @@
-The story of Mbombo's creation tells that in the beginning, Mbombo was alone, and darkness
-and water covered the all earth. It would happen that Mbombo came to feel an intense pain
-in his stomach, and then Mbombo vomited the sun, the moon, and stars.
+This is really just uploaded as a code example.  Please don't use this as-is, because there are much better solutions out there, which unfortunately I didn't know about at the time, and Spring/Hibernate wasn't an option.  Plus, I've always wanted to try this :D
+
+Taken from Wikipedia and edited slightly:
+
+"The creation story of Mbombo, or Bumba, tells us that in the beginning, Mbombo was alone, and darkness
+and water covered all of earth. It would happen that Mbombo came to feel an intense pain
+in his stomach, and then Mbombo vomited the sun, the moon, and stars."
 
 Like Mbombo, Bumba was an initial effort to vomit forth the incredible amount of structure needed for creating a persistence layer.  Bumba provides the tools to create typed database objects and foreign-key-aware accessors straight from an existing schema using JDBC.
 
@@ -11,6 +15,14 @@ Features:
 
 Project is in IntelliJ and uses Apache Velocity for code generation.  Used only for PostgreSQL 9.1 w/ 9.1 connector, but any database with a JDBC driver that provides reasonably compliant metadata should do.
 
+BUGS:
+-Tables without a primary key generate broken code
+-Multiple unique keys of the same type create invalid overloaded constructors
+-Example template code is coupled to generated classes.  Those should either be refactored out or included in the generated output
+-Propagation of deletes and saves to sub-objects don't quite work right and are disabled for the moment (see functions.vm
+-Casting code smells are baaaad
+-Formatting is also baaaad
+
 Future features that'd be nice to have:
 -Unit tests!
 -Templates to output classes compatible with popular persistence frameworks (eg. JPA)
@@ -20,4 +32,6 @@ Future features that'd be nice to have:
 -Output conformance to a less clunky design pattern, perhaps utilizing/implementing interfaces
 -Style formatting automation to cleanup output files after generation (for now you have to use IDE formatting tools)
 -Pruning of smelly functions in Sandbox and conversion to a legitimate usage console
--Decouple SQL strings from implementations
+-Decouple SQL strings from implementations in the example template
+-Exceptions that don't suck
+-Configurable package declarations!
