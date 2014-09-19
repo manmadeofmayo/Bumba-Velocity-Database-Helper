@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact name="VelocityDatabaseHelper:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/VelocityDatabaseHelper_jar</output-path>
+    <root id="root">
+      <element id="archive" name="VelocityDatabaseHelper.jar">
+        <element id="module-output" name="VelocityDatabaseHelper" />
+      </element>
+      <element id="library" level="project" name="velocity-1.7" />
+      <element id="library" level="project" name="org.postgresql:postgresql:9.2-1003-jdbc4" />
+    </root>
+  </artifact>
+</component>
