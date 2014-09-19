@@ -1,98 +1,10 @@
-## load method
-public boolean load(String sql, List columns) {
-boolean isSuccess = false;
-EasyConnector ec = new EasyConnector(EasyConnector.ConnectionType.ORDERS);
-ResultSet rs = ec.getQuery(sql, columns);
-try {
-if (rs.next()) {
-#foreach($column in $do.getColumns())
-this.${column.getCamelCaseName(false)} = ${column.getRsIdentifier()};
-#end
-}
-## TODO: convert foreign key references to lazy loading
-#foreach($reference in $referenceColumns)
-    #if($reference.isUnique())
-        $reference.getOwningTable().getCamelCaseName(false) = new ${reference.getOwningTable().getCamelCaseName(true)}(${pk.getCamelCaseName(false)});
-    #else
-        $reference.getOwningTable().getCamelCaseName(false) = ${reference.getOwningTable().getCamelCaseName(true)}.get${reference.getOwningTable().getCamelCaseName(true)}From${reference.getCamelCaseName(true)}($reference.getReferencedColumn().getCamelCaseName(false));
-    #end
-#end
-isSuccess = true;
-} catch (SQLException e) {
-e.printStackTrace();
-} finally {
-ec.close();
-}
-return isSuccess;
-}
+#createLoad( $referenceColumns, $pk)
 
-##packageVars method
-## TODO: add reference table object checks
-public List packageVars(boolean addId) {
-List returnList = new ArrayList();
-#foreach($column in $do.getColumns(false))
-returnList.add($column.getCamelCaseName(false));
-#end
-if (addId) {
-#if($pk)
-returnList.add($pk.getCamelCaseName(false));
-#end
-}
-return returnList;
-}
+#createPackageVars($do.getColumns(false) $pk)
 
-## validate method
-## TODO: add constraint checking to validation
-## TODO: add subObject checking for validation
-## TODO: only add null checking for fields that must be not null.
-## TODO: validate foreign key references
-## TODO: quick check by checking isModified()
-public boolean validate() {
-#foreach($column in $do.getColumns())
-#if($column.getNullable())
-#else
-if ($column.getCamelCaseName(false) == null) {
-return false;
-}
-#end
-#end
-return true;
-}
+#createValidate($do.getColumns())
 
-## save method
-public boolean save() {
-#if($pk)
-boolean successful = false;
-if (!validate()) {
-throw new RuntimeException("Call to $do.getCamelCaseName(true) save method failed validation.  Always call validate() method before save().");
-}
-EasyConnector ec = new EasyConnector(EasyConnector.ConnectionType.ORDERS);
-if ($pk.getCamelCaseName(false) == $pk_default) {
-$pk.getCamelCaseName(false) = ($pk.getJavaType())ec.executeAndReturnDefault("INSERT INTO ${do.getOwningSchema().getSchema()}.${do.getTableName()} (" +
-#foreach ($column in $do.getColumns(true))
-"${column.columnName}#if($velocityHasNext),#else)#end " +
-#end
-"VALUES (" +
-## TODO: checks for DEFAULT for values
-"DEFAULT#foreach($column in $do.getColumns(false)),?#end)", packageVars(false)
-);
-if ($pk.getCamelCaseName(false) != $pk_default) {
-successful = true;
-}
-} else {
-successful = (ec.update("UPDATE ${do.getOwningSchema().getSchema()}.${do.getTableName()} SET " +
-#foreach($column in $do.getColumns(false))
-"$column.getColumnName()=?#if($velocityHasNext),#end " +
-#end
-"WHERE $pk.getColumnName()=?", packageVars(true)) == 1);
-}
-ec.close();
-## TODO: save down methods
-return successful;
-#else
-    throw new RuntimeException("Save method not supported for this object");
-#end
-}
+#createSave($do)
 
 ## isModified method
 public boolean isModified() {
@@ -100,11 +12,23 @@ return isModified;
 }
 
 ## delete method
-public void delete() {
+public void delete(Connection c) throws SQLException {
+/* disabled for now, as this isn't working quite right
+#foreach($ref in $do.getForeignKeyReferences())
+    for (${ref.getTableType()} ${ref.getRefName()}Element : ${ref.getRefName()}) {
+        ${ref.getRefName()}Element.delete(c);
+    }
+#end
+*/
 #if($pk)
-EasyConnector ec = new EasyConnector(EasyConnector.ConnectionType.ORDERS);
-ec.execute("DELETE FROM ${do.getOwningSchema().getSchema()}.${do.tableName} WHERE id=?", Arrays.asList($pk.getCamelCaseName(false)));
-ec.close();
+
+
+    try (
+        PreparedStatement ps = c.prepareStatement("DELETE FROM ${do.getOwningSchema().getSchema()}.${do.tableName} WHERE id=?");
+        ResultSet rs = DataConnector.getEasyResultSet(ps, Arrays.asList($pk.getCamelCaseName(false)))
+    ) {
+        rs.next();
+    }
 ## TODO: delete down methods
 #else
     throw new RuntimeException("method delete not supported on this object");

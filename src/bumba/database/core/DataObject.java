@@ -1,23 +1,21 @@
 package bumba.database.core;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
-/**
- * Created by emcee on 7/24/13.
- * Interface for all data-backed classes providing essential methods
- */
 public interface DataObject {
     public boolean validate();
 
-    public boolean save();
+    public void save(Connection c) throws SQLException, Exception;
 
-    public boolean load(String sql, List columns);
+    public void load(Connection c, String sql, List columns) throws Exception;
 
     public List packageVars(boolean addId);
 
     public boolean isModified();
 
- /*   public Integer getId();*/
+    public Integer getId();
 
-    void delete();
+    public void delete(Connection c) throws Exception;
 }

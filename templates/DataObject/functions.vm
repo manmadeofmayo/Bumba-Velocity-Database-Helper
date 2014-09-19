@@ -1,0 +1,216 @@
+#* @vtlvariable name="references" type="bumba.database.core.Column[]" *#
+#macro(getTemplate)
+## public static final class main {
+##public static void name = statement;
+## ...
+## public static void main() {
+##   Boolean cats = Boolean.FALSE;
+##   ...
+## }
+##}
+
+## modifiers type name {
+##  modifiers memberVarName assignment;
+##
+##  methodModifiers methodName(methodParams) {
+##      #methodMembers methodMemberName methodMemberAssignment
+##        methodLines
+##  }
+
+
+#end
+
+#macro(getDeclaration $declaration, $body)
+    #set($returnString = "")
+    #foreach($modifier in $declaration)
+        $returnString += $modifier + " "
+    $
+    #end
+#end
+
+
+#macro(createGetter)
+#end
+
+#macro(createSetter)
+#end
+
+#macro(createConstructor)
+#end
+
+#macro(createSavePropagate $references)
+//propagate keys
+    #foreach($ref in $references)
+    for ($ref.getTableType() $ref.getRefName()Object : $ref.getRefName()) {
+        ${ref.getRefName()}Object.set${ref.getCamelCaseName(true)}($ref.getReferencedColumn().getName());
+    }
+    #end
+#end
+
+#macro(createSave $do)
+## save method
+public void save(Connection c) throws Exception {
+    if (!isModified) {
+        return;
+    }
+    #set($pk=$do.getPrimaryKey())
+    #set($pk_default=$pk.getDefaultValue())
+    #if($pk)
+    if (!validate()) {
+    throw new RuntimeException("Call to $do.getCamelCaseName(true) save method failed validation.  Always call validate() method before save().");
+    }
+    if ($pk.getCamelCaseName(false) == $pk_default) {
+        try (
+            PreparedStatement ps = c.prepareStatement(
+                "INSERT INTO ${do.getOwningSchema().getSchema()}.${do.getTableName()} (" +
+                    #foreach ($column in $do.getColumns(true))
+                    "${column.columnName}#if($velocityHasNext),#else)#end " +
+                    #end
+                    "VALUES (" +
+                    ## TODO: checks for DEFAULT for values
+                    "DEFAULT#foreach($column in $do.getColumns(false)),?#end)"
+                ,PreparedStatement.RETURN_GENERATED_KEYS
+            );
+            ResultSet rs = DataConnector.getEasyResultSet(ps, packageVars(false));
+        ) {
+            if (rs.next()) {
+                $pk.getCamelCaseName(false) = ($pk.getJavaType())rs.getObject(1);
+            }
+        }
+    } else {
+        try (
+            PreparedStatement ps = c.prepareStatement("UPDATE ${do.getOwningSchema().getSchema()}.${do.getTableName()} SET " +
+                #foreach($column in $do.getColumns(false))
+                "$column.getColumnName()=?#if($velocityHasNext),#end " +
+                #end
+                "WHERE $pk.getColumnName()=?");
+            ResultSet rs = DataConnector.getEasyResultSet(ps, packageVars(true));
+        ) {
+            rs.next();
+        }
+    }
+        /* disabled, since foreign references are disabled
+        #createSavePropagate($do.getForeignKeyReferences())
+        #createSaveDelete($do.getForeignKeyReferences())
+        #createSaveDown($do.getForeignKeyReferences())
+        */
+
+
+    #else
+    throw new RuntimeException("Save method not supported for this object");
+    #end
+}
+#end
+
+#macro(createSaveDelete $references)
+// delete old sub objects
+    #foreach($ref in $references)
+        #if($ref.isUnique() || $ref.isPrimaryKey())
+
+        #end
+    List<$ref.getTableType()> $ref.getTableName()Values = ${ref.getTableType()}.get${ref.getTableType()}From$ref.getCamelCaseName(true)(${ref.getReferencedColumn().getCamelCaseName(false)});
+    for (DataObject $ref.getRefName()Object : getMissingOldObjects((List<DataObject>)(List<?>)$ref.getRefName(), (List<DataObject>)(List<?>)${ref.getTableName()}Values)) {
+        ${ref.getRefName()}Object.delete(c);
+    }
+    #end
+
+#end
+
+#macro(createSaveDown $references)
+    // save down
+    #foreach($ref in $references)
+    for ($ref.getTableType() $ref.getRefName()Object : $ref.getRefName()) {
+        ${ref.getRefName()}Object.save(c);
+    }
+    #end
+#end
+
+
+#macro(createLoad $referenceColumns $pk)
+## load method
+public void load(Connection c, String sql, List columns) throws SQLException {
+    try (
+        PreparedStatement ps = c.prepareStatement( sql );
+        ResultSet rs = DataConnector.getEasyResultSet(ps, columns);
+    ) {
+        if (rs.next()) {
+            #foreach($column in $do.getColumns())
+                this.${column.getCamelCaseName(false)} = ${column.getRsIdentifier()};
+            #end
+
+            // create referenced objects
+            #foreach($reference in $referenceColumns)
+                #if($reference.isUnique())
+                    $reference.getOwningTable().getCamelCaseName(false) = new ${reference.getOwningTable().getCamelCaseName(true)}(c, ${pk.getCamelCaseName(false)});
+                #else
+                    $reference.getOwningTable().getCamelCaseName(false) = ${reference.getOwningTable().getCamelCaseName(true)}.get${reference.getOwningTable().getCamelCaseName(true)}From${reference.getCamelCaseName(true)}($reference.getReferencedColumn().getCamelCaseName(false));
+                #end
+            #end
+        }
+    }
+}
+#end
+
+#macro(createRefDeclarations $referenceColumns)
+    #foreach($reference in $referenceColumns)
+        #if($reference.isUnique())
+        protected $reference.getOwningTable().getCamelCaseName(true) $reference.getOwningTable().getCamelCaseName(false);
+        #else
+        protected List<$reference.getOwningTable().getCamelCaseName(true)> $reference.getOwningTable().getCamelCaseName(false);
+        #end
+    #end
+
+// references on this table (currently omitted)
+    #foreach($column in $do.getColumns())
+        #if($column.isReference())
+            #set($ref = $column.getReferencedColumn())
+        ##protected $ref.getOwningTable().getCamelCaseName(true) $ref.getOwningTable().getCamelCaseName(false);##$ref.getCamelCaseName(true);
+        #end
+    #end
+#end
+
+#macro(createVarDeclarations $columns)
+    #foreach($column in $do.getColumns())
+    protected ${column.getJavaType()} ${column.getCamelCaseName(false)} = ${column.getDefaultValue()};
+    #end
+#end
+
+#macro(createValidate $columns)
+
+## validate method
+## TODO: add constraint checking to validation
+## TODO: add subObject checking for validation
+## TODO: only add null checking for fields that must be not null.
+## TODO: validate foreign key references
+## TODO: quick check by checking isModified()
+public boolean validate() {
+    #foreach($column in $do.getColumns())
+        #if($column.getNullable())
+        #else
+        if ($column.getCamelCaseName(false) == null) {
+        return false;
+        }
+        #end
+    #end
+return true;
+}
+#end
+
+#macro(createPackageVars $columns $pk)
+##packageVars method
+## TODO: add reference table object checks
+@SuppressWarnings("unchecked")
+public List packageVars(boolean addId) {
+List returnList = new ArrayList();
+    #foreach($column in $columns)
+    returnList.add($column.getCamelCaseName(false));
+    #end
+if (addId) {
+    #if($pk)
+    returnList.add($pk.getCamelCaseName(false));
+    #end
+}
+return returnList;
+}
+
+#end

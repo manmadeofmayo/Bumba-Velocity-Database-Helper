@@ -1,6 +1,7 @@
-#* @vtlvariable name="do" type="bumba.Table" *#
-#* @vtlvariable name="database" type="bumba.Database" *#
-#* @vtlvariable name="pk" type="bumba.Column" *#
+#* @vtlvariable name="do" type="bumba.database.core.Table" *#
+#* @vtlvariable name="database" type="bumba.database.core.Database" *#
+#* @vtlvariable name="pk" type="bumba.database.core.Column" *#
+
 #set($package="generated")
 #if($pk.getJavaType() == "java.lang.Integer")
 #set($pk_default = -1)
@@ -13,38 +14,24 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import bumba.DataObject;
-import bumba.EasyConnector;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
+## TODO: refactor these out, or include them in generated output
+import bumba.database.core.DataConnector;
+import bumba.database.core.ParentDataObject;
+
 #set($referenceColumns=$do.getForeignKeyReferences())
 #foreach($reference in $referenceColumns)
 import ${package}.$reference.getOwningTable().getCamelCaseName(true);
 #end
 
-public class $do.getCamelCaseName(true) implements DataObject {
+public class $do.getCamelCaseName(true) extends ParentDataObject {
 ## column definitions
 ## TODO: add default handling
     protected boolean isModified = false;
-#if($pk)
-    protected $pk.getJavaType() $pk.getCamelCaseName(false) = $pk_default;
-#end
-#foreach($column in $do.getColumns(false))
-    protected ${column.getJavaType()} $column.getCamelCaseName(false) = null;
-#end
+    #createVarDeclarations($do.getColumns())
 
 
     // foreign keys referencing this table
-#foreach($reference in $referenceColumns)
-#if($reference.isUnique())
-    protected $reference.getOwningTable().getCamelCaseName(true) $reference.getOwningTable().getCamelCaseName(false);
-#else
-    protected List<$reference.getOwningTable().getCamelCaseName(true)> $reference.getOwningTable().getCamelCaseName(false);
-#end
-#end
-
-    // references on this table (currently omitted)
-#foreach($column in $do.getColumns())
-#if($column.isReference())
-#set($ref = $column.getReferencedColumn())
-##protected $ref.getOwningTable().getCamelCaseName(true) $ref.getOwningTable().getCamelCaseName(false);##$ref.getCamelCaseName(true);
-#end
-#end
+#createRefDeclarations($referenceColumns)

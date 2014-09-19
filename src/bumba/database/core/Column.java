@@ -75,6 +75,19 @@ public class Column {
         } catch (SQLException e) {
             //e.printStackTrace();
         }
+        setDefaultValue();
+    }
+
+    private void setDefaultValue() {
+        if (defaultValue == null) {
+            defaultValue = "null";
+        } if(defaultValue.contains("::")) {
+            defaultValue = defaultValue.substring(0,defaultValue.indexOf("::"));
+        } if (defaultValue.contains("(")) {
+            defaultValue = "null";
+        } else if (defaultValue.contains("'")) {
+            defaultValue = defaultValue.replaceAll("'", "\"");
+        }
     }
 
     public String getJavaType() {
@@ -162,13 +175,6 @@ public class Column {
     }
 
     public String getDefaultValue() {
-        if (defaultValue == null) {
-            return "null";
-        } else if(defaultValue.contains("::")) {
-            return defaultValue.substring(0,defaultValue.indexOf("::"));
-        } else if (defaultValue.contains("(")) {
-            return "null";
-        }
         return defaultValue;
     }
 
@@ -245,7 +251,7 @@ public class Column {
     }
 
     public String getTableName() {
-        return getOwningTable().getCanonicalName();
+        return getOwningTable().getTableName();
     }
 
     public String getCanonicalName() {

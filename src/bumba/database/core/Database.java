@@ -19,45 +19,41 @@ public class Database {
         }
         schemaData.close();
     }
-    public Database() throws SQLException, ClassNotFoundException {
-        EasyConnector ec = new EasyConnector(EasyConnector.ConnectionType.ORDERS);
-        Connection c = ec.connection;
-        DatabaseMetaData dbmd = c.getMetaData();
-        ResultSet schemaData = dbmd.getSchemas();
+    protected Database() {
 
-        while (schemaData.next()) {
-            schemas.add(new Schema(schemaData));
-        }
-        schemaData.close();
-        ec.close();
-        setKeyReferences();
     }
 
-    public static Database getDatabase() throws SQLException, ClassNotFoundException {
-        EasyConnector ec = new EasyConnector(EasyConnector.ConnectionType.ORDERS);
-        Connection c = ec.connection;
+    public static Database getDatabase(Connection c) throws SQLException, ClassNotFoundException {
         return new Database(c);
     }
 
-    public void setKeyReferences() throws SQLException {
-        EasyConnector ec = new EasyConnector(EasyConnector.ConnectionType.ORDERS);
-        DatabaseMetaData dbmd = ec.connection.getMetaData();
+    public void setKeyReferences(Connection c) throws SQLException {
+        DatabaseMetaData dbmd = c.getMetaData();
         ResultSet rs = dbmd.getExportedKeys(null, null, null);
         while (rs.next()) {
             String pkTableName = rs.getString("PKTABLE_NAME");
+            String pkTableSchema = rs.getString("PKTABLE_SCHEM");
+
             String fkTableName = rs.getString("FKTABLE_NAME");
+            String fkTableSchema = rs.getString("FKTABLE_SCHEM");
+
             String pkColumnName = rs.getString("PKCOLUMN_NAME");
             String fkColumnName = rs.getString("FKCOLUMN_NAME");
             if (pkTableName != null && fkTableName != null && pkColumnName != null && fkColumnName != null) {
                 Table pkTable = null;
+                List<Table> pkTables = findAllByName(pkTableName);
+                List<Table> fkTables = findAllByName(fkTableName);
+
+
+
                 try {
-                    pkTable = findByName(pkTableName, false);
+                    pkTable = getSchema(pkTableSchema).getTable(pkTableName);
                 } catch (Exception e) {
-                    System.err.println(e.getMessage());
+                    System.err.println(pkTableName + ": " + e.getMessage());
                 }
                 Table fkTable = null;
                 try {
-                    fkTable = findByName(fkTableName, false);
+                    fkTable = getSchema(fkTableSchema).getTable(fkTableName);
                 } catch (Exception e) {
                     System.err.println(e.getMessage());
                 }
@@ -74,17 +70,14 @@ public class Database {
                 pkColumn.addReferencedBy(fkColumn);
             }
         }
-        ec.close();
     }
 
-    public void setUniqueColumns() throws Exception {
-        EasyConnector ec = new EasyConnector(EasyConnector.ConnectionType.ORDERS);
-        DatabaseMetaData dbmd = ec.connection.getMetaData();
+    public void setUniqueColumns(Connection c) throws Exception {
+        DatabaseMetaData dbmd = c.getMetaData();
         ResultSet rs = dbmd.getIndexInfo(null, null, null, true, false);
         while (rs.next()) {
 
         }
-        ec.close();
     }
 
     @Override
@@ -127,5 +120,21 @@ public class Database {
             }
         }
         return firstMatch;
+    }
+
+    public List<Table> findAllByName(String tableName) {
+        List<Table> tablesFound = new ArrayList<>();
+        for (Schema schema : schemas) {
+            try {
+                tablesFound.add(schema.getTable(tableName));
+            } catch (Exception e) {
+                // do nothing
+            }
+        }
+        return tablesFound;
+    }
+
+    public List<Schema> getSchemas() {
+        return schemas;
     }
 }

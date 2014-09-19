@@ -1,12 +1,9 @@
-// START HEADER
+#parse("functions.vm")
+
 #parse("DataObject.header.vm")
-// END HEADER
-// START CONSTRUCTOR
+
 #parse("DataObject.constructor.vm")
-// END CONSTRUCTOR
-// START METHODS
+
 #parse("DataObject.methods.vm")
-// END METHODS
-// START FOOTER
+
 #parse("DataObject.footer.vm")
-// END FOOTER

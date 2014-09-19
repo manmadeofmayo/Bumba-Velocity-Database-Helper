@@ -1,12 +1,12 @@
-    public $do.getCamelCaseName(true)() {
+    protected $do.getCamelCaseName(true)() {
         super();
     }
 
 ## unique key constructors
 #foreach($column in $do.getColumns())
 #if($column.isUnique())
-    public $do.getCamelCaseName(true)($column.getJavaType() $column.getCamelCaseName(false)) {
-        load("SELECT " +
+    public $do.getCamelCaseName(true)(Connection c, $column.getJavaType() $column.getCamelCaseName(false)) throws SQLException {
+        load(c, "SELECT " +
 #foreach($innerColumn in $do.getColumns())
 #if($velocityHasNext)
                 "$innerColumn.columnName, " +
@@ -19,16 +19,24 @@
     }
 
 #elseif($column.isReference())
-    public static List<${do.getCamelCaseName(true)}> get$do.getCamelCaseName(true)From${column.getCamelCaseName(true)}($column.getJavaType() $column.getCamelCaseName(false)) throws SQLException {
+    public static List<${do.getCamelCaseName(true)}> get$do.getCamelCaseName(true)From${column.getCamelCaseName(true)}(Connection c, $column.getJavaType() $column.getCamelCaseName(false)) throws SQLException {
         List<$do.getCamelCaseName(true)> return$do.getCamelCaseName(true) = new ArrayList<>();
-        EasyConnector ec = new EasyConnector(EasyConnector.ConnectionType.ORDERS);
-        ResultSet rs = ec.getQuery("SELECT " +
+        try (
+            PreparedStatement ps = c.prepareStatement(
+                "SELECT " +
                 "$pk.getColumnName() " +
-            "FROM ${do.getOwningSchema().getSchema()}.$do.getTableName() WHERE $column.getColumnName()=?", Arrays.asList($column.getCamelCaseName(false)));
-        while (rs.next()) {
-            return${do.getCamelCaseName(true)}.add(new $do.getCamelCaseName(true)(${pk.getRsIdentifier()}));
+                "FROM ${do.getOwningSchema().getSchema()}.$do.getTableName() WHERE $column.getColumnName()=?"
+            );
+            ResultSet rs = DataConnector.getEasyResultSet(ps, Arrays.asList($column.getCamelCaseName(false)))
+        ) {
+            while (rs.next()) {
+                return${do.getCamelCaseName(true)}.add(new $do.getCamelCaseName(true)(c, ${pk.getRsIdentifier()}));
+            }
+            return return${do.getCamelCaseName(true)};
         }
-        return return${do.getCamelCaseName(true)};
+
+
+
     }
 #end
 #end

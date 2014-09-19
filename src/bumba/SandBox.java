@@ -16,26 +16,29 @@ import java.util.Properties;
  */
 public class SandBox {
     public static void main(String[] args) {
-        EasyConnector ec = null;
+        Connection c = null;
+
         try {
-            ec = new EasyConnector(EasyConnector.ConnectionType.ORDERS);
-            Database db = Database.getDatabase();
-            Schema schema = db.getSchema("orders");
-            Table table = schema.getTable("bundles");
+            c = DataConnector.getTestDatabaseConnection();
+            Database db = Database.getDatabase(c);
+            Schema schema = db.getSchema("public");
             //createVelocityTemplates(schema);
             //printSomeStuff(table);
-            db.setKeyReferences();
-            //table = schema.getTable("coupons_actions");
+            db.setKeyReferences(c);
             ////System.out.println(prettyPrint(table.toString()));
             //printReferences(schema.getTableList());
             //printUniqueColumns(schema.getTableList());
+            for (Schema theSchema :db.getSchemas()){
+                createVelocityTemplates(theSchema);
+            }
             createVelocityTemplates(schema);
             //identifyPotentialNonPrimaryIds(schema);
             //identifyPotentialUnlinkedColumns(schema);
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+
         }
-        ec.close();
     }
 
     public static void identifyPotentialNonPrimaryIds(Schema schema) {
@@ -133,7 +136,7 @@ public class SandBox {
 
     public static void createVelocityTemplate(Table table) throws Exception {
         Properties p = new Properties();
-        p.setProperty("file.resource.loader.path", "B:\\Dropbox\\Projects\\intellij\\VelocityDatabaseHelper\\templates\\DataObject");
+        p.setProperty("file.resource.loader.path", "templates\\DataObject");
         Velocity.init(p);
         VelocityContext context = new VelocityContext();
         //System.out.println("table start: " + table.getTableName());
@@ -157,29 +160,5 @@ public class SandBox {
         printWriter.flush();
         printWriter.close();
         System.out.format("Completed processing %s for template %s\n", table.getTableName(), template.toString());
-    }
-
-    public static void printSomeStuff() {
-        EasyConnector ec = new EasyConnector(EasyConnector.ConnectionType.ORDERS);
-        Database db = null;
-        try {
-            db = new Database(ec.getConnection());
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        Schema orders = null;
-        try {
-            orders = db.getSchema("orders");
-            Table productsEmails = orders.getTable("bundles");
-            //System.out.println(prettyPrint(productsEmails.toString()));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        ////System.out.println(prettyPrint(db.toString()));
-    }
-
-    // indents based on { }
-    public static String prettyPrint(String data) {
-        return data.replaceAll(", ", ",\n");
     }
 }
